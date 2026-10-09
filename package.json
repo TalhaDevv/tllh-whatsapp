@@ -1,0 +1,22 @@
+{
+  "name": "tllh-wa",
+  "version": "2.0.0",
+  "description": "Local WhatsApp bridge: Baileys session plus a FastAPI archive dashboard",
+  "main": "tllh_whatsapp.js",
+  "scripts": {
+    "start": "node tllh_whatsapp.js",
+    "dev": "nodemon tllh_whatsapp.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.23",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.2",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

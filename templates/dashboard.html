@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TLLH-WA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:        #111113;
+    --bg-2:      #18181a;
+    --bg-3:      #1f1f22;
+    --line:      rgba(255,255,255,0.07);
+    --line-2:    rgba(255,255,255,0.12);
+
+    --t1:        #ededee;   /* ana metin */
+    --t2:        #9a9a9f;   /* ikincil */
+    --t3:        #5e5e63;   /* soluk */
+
+    --white:     #ffffff;
+    --red:       #c4554d;   /* sadece tehlike için, soluk */
+
+    --r: 8px;
+    --font: 'Inter', system-ui, sans-serif;
+    --tr: 0.15s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--t1);
+    font-family: var(--font);
+    font-size: 13.5px;
+    display: flex;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+  }
+
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; border: 2px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--line-2); }
+
+  /* ====================== SIDEBAR ====================== */
+  #sidebar {
+    width: 264px;
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+
+  #side-top {
+    padding: 18px 16px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand-mark {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--white);
+    color: #000;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    letter-spacing: 0;
+  }
+  .brand-name { font-size: 13.5px; font-weight: 600; }
+  .brand-status { font-size: 11px; color: var(--t3); margin-top: 1px; }
+  .brand-status.on { color: var(--t2); }
+  .brand-status::before { content: '● '; font-size: 8px; vertical-align: 1px; }
+
+  /* Komut paleti tetikleyici */
+  #cmdk-trigger {
+    margin: 4px 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    color: var(--t3);
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: var(--tr);
+    font-family: inherit;
+    width: calc(100% - 24px);
+    text-align: left;
+  }
+  #cmdk-trigger:hover { border-color: var(--line-2); color: var(--t2); }
+  #cmdk-trigger kbd {
+    margin-left: auto;
+    font-family: inherit;
+    font-size: 10.5px;
+    background: var(--bg-3);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--t3);
+  }
+
+  /* Nav — Linear tarzı metin satırları */
+  .nav-group { padding: 0 8px; }
+  .nav-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--t3);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    padding: 12px 10px 6px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 7px 10px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: var(--t2);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: var(--tr);
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--bg-2); color: var(--t1); }
+  .nav-item.active { background: var(--bg-3); color: var(--white); }
+  .nav-item .n-ico { width: 16px; text-align: center; opacity: 0.75; font-size: 13px; font-style: normal; }
+  .nav-item .n-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--t3);
+    font-variant-numeric: tabular-nums;
+  }
+  .nav-item .n-key {
+    margin-left: 6px;
+    font-size: 10px;
+    color: var(--t3);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0 4px;
+    opacity: 0;
+    transition: var(--tr);
+  }
+  .nav-item:hover .n-key { opacity: 1; }
+
+  /* Sohbet listesi */
+  #chat-section { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: 8px; }
+  #chat-list { flex: 1; overflow-y: auto; padding: 2px 8px 12px; }
+
+  .chat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--tr);
+  }
+  .chat-item:hover { background: var(--bg-2); }
+  .chat-item.active { background: var(--bg-3); }
+  .chat-item.active .c-name { color: var(--white); }
+
+  .c-av {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--bg-3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    color: var(--t2);
+  }
+  .c-av img { width: 100%; height: 100%; object-fit: cover; }
+
+  .c-meta { flex: 1; min-width: 0; }
+  .c-name {
+    font-size: 13px; font-weight: 500; color: var(--t1);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .c-preview {
+    font-size: 11.5px; color: var(--t3); margin-top: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .c-time { font-size: 10.5px; color: var(--t3); font-variant-numeric: tabular-nums; flex-shrink: 0; }
+  .c-hide {
+    display: none;
+    border: none; background: none; color: var(--t3);
+    cursor: pointer; font-size: 11px; padding: 2px;
+    flex-shrink: 0;
+  }
+  .chat-item:hover .c-hide { display: block; }
+  .chat-item:hover .c-time { display: none; }
+  .c-hide:hover { color: var(--red); }
+
+  /* ====================== MAIN ====================== */
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  #topbar {
+    height: 52px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 8px;
+  }
+  .crumb { font-size: 13px; color: var(--t3); }
+  .crumb-sep { color: var(--t3); font-size: 11px; }
+  .crumb-current { font-size: 13px; font-weight: 600; color: var(--t1); }
+
+  #top-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 18px;
+    font-size: 12px;
+    color: var(--t3);
+    font-variant-numeric: tabular-nums;
+  }
+  #top-stats b { color: var(--t2); font-weight: 600; }
+
+  #panel { flex: 1; overflow-y: auto; }
+  .panel-inner { max-width: 980px; margin: 0 auto; padding: 28px 32px 48px; }
+
+  /* ---- Sayfa başlığı ---- */
+  .page-head { margin-bottom: 24px; }
+  .page-head h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+  .page-head p { font-size: 13px; color: var(--t3); margin-top: 4px; }
+
+  /* ---- Sohbet banner ---- */
+  .chat-banner {
+    display: flex; align-items: center; gap: 13px;
+    margin-bottom: 26px;
+  }
+  .chat-banner .av {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--bg-3); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0; color: var(--t2);
+  }
+  .chat-banner .av img { width: 100%; height: 100%; object-fit: cover; }
+  .chat-banner h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+  .chat-banner .jid { font-size: 11.5px; color: var(--t3); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+  /* ---- Mesajlar ---- */
+  #msg-feed { display: flex; flex-direction: column; }
+
+  .day-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 22px 0 14px;
+    font-size: 11px; color: var(--t3); font-weight: 500;
+  }
+  .day-divider::before, .day-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--line);
+  }
+
+  .msg {
+    display: flex; gap: 12px;
+    padding: 5px 10px;
+    margin: 0 -10px;
+    border-radius: var(--r);
+    transition: background var(--tr);
+  }
+  .msg:hover { background: var(--bg-2); }
+  .msg:hover .m-time { opacity: 1; }
+
+  .m-av {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--bg-3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; flex-shrink: 0; margin-top: 2px;
+    color: var(--t2);
+  }
+  .m-av.ghost { background: transparent; } /* gruplu mesajda boş hizalayıcı */
+
+  .m-body { flex: 1; min-width: 0; }
+  .m-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+  .m-name { font-size: 13px; font-weight: 600; color: var(--t1); }
+  .m-name.me { color: var(--t2); }
+  .m-me-tag {
+    font-size: 9.5px; font-weight: 600; color: var(--t3);
+    border: 1px solid var(--line); border-radius: 3px; padding: 0 4px;
+  }
+  .m-time { font-size: 11px; color: var(--t3); font-variant-numeric: tabular-nums; }
+  .msg .m-time-side {
+    font-size: 10.5px; color: var(--t3);
+    width: 34px; flex-shrink: 0; text-align: right;
+    opacity: 0; transition: var(--tr);
+    margin-top: 5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .msg:hover .m-time-side { opacity: 1; }
+
+  .m-text {
+    font-size: 13.5px; line-height: 1.55; color: #d4d4d8;
+    word-break: break-word; white-space: pre-wrap;
+  }
+  .m-badge {
+    display: inline-block;
+    font-size: 10.5px; color: var(--t2);
+    border: 1px solid var(--line); border-radius: 4px;
+    padding: 1px 6px; margin-right: 6px;
+    vertical-align: 1px;
+  }
+
+  /* ---- Tablolar ---- */
+  .table-wrap {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-size: 11px; font-weight: 600;
+    color: var(--t3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+  }
+  td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background var(--tr); }
+  tbody tr:hover { background: var(--bg-2); }
+
+  .td-dim { color: var(--t3); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .td-strong { font-weight: 600; }
+
+  .status-dot { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 500; }
+  .status-dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .status-dot.on  { color: var(--t1); }
+  .status-dot.on::before  { background: var(--white); }
+  .status-dot.off { color: var(--t3); }
+  .status-dot.off::before { background: var(--t3); }
+
+  .vo-thumb {
+    width: 44px; height: 44px;
+    border-radius: 6px; object-fit: cover;
+    border: 1px solid var(--line);
+    transition: var(--tr);
+    display: block;
+  }
+  .vo-thumb:hover { transform: scale(2.2); border-color: var(--line-2); cursor: zoom-in; }
+
+  /* ---- Durumlar ---- */
+  .empty {
+    padding: 90px 0;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; text-align: center;
+  }
+  .empty h3 { font-size: 14px; font-weight: 600; color: var(--t2); }
+  .empty p { font-size: 12.5px; color: var(--t3); }
+  .empty kbd {
+    font-family: inherit; font-size: 11px;
+    background: var(--bg-3); border: 1px solid var(--line);
+    border-radius: 4px; padding: 1px 6px; color: var(--t2);
+  }
+
+  .loading { display: flex; justify-content: center; padding: 90px 0; }
+  .loader {
+    width: 18px; height: 18px;
+    border: 2px solid var(--line-2);
+    border-top-color: var(--t1);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  /* ====================== COMMAND PALETTE ====================== */
+  #cmdk-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 14vh;
+    z-index: 100;
+  }
+  #cmdk-overlay.open { display: flex; }
+
+  #cmdk {
+    width: 560px; max-width: 92vw;
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    overflow: hidden;
+    animation: cmdk-in 0.14s ease;
+  }
+  @keyframes cmdk-in { from { opacity: 0; transform: scale(0.98) translateY(-6px); } to { opacity: 1; transform: none; } }
+
+  #cmdk-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 15px 18px;
+    font-size: 14.5px;
+    color: var(--t1);
+    font-family: inherit;
+    outline: none;
+  }
+  #cmdk-input::placeholder { color: var(--t3); }
+
+  #cmdk-results { max-height: 320px; overflow-y: auto; padding: 6px; }
+  .ck-label {
+    font-size: 10.5px; font-weight: 600; color: var(--t3);
+    text-transform: uppercase; letter-spacing: 0.7px;
+    padding: 8px 12px 4px;
+  }
+  .ck-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--t2);
+  }
+  .ck-item .ck-ico { width: 18px; text-align: center; font-style: normal; opacity: 0.8; }
+  .ck-item.selected { background: var(--bg-3); color: var(--white); }
+  .ck-item .ck-hint { margin-left: auto; font-size: 11px; color: var(--t3); }
+  .ck-empty { padding: 28px; text-align: center; color: var(--t3); font-size: 13px; }
+
+  #cmdk-foot {
+    border-top: 1px solid var(--line);
+    padding: 8px 14px;
+    display: flex; gap: 16px;
+    font-size: 11px; color: var(--t3);
+  }
+  #cmdk-foot kbd {
+    font-family: inherit; font-size: 10px;
+    background: var(--bg-3); border: 1px solid var(--line);
+    border-radius: 3px; padding: 0 4px; margin-right: 4px;
+  }
+
+  /* ---- Toast ---- */
+  #toasts { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 200; }
+  .toast {
+    background: var(--bg-3);
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 13px;
+    color: var(--t1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    animation: toast-in 0.2s ease;
+  }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .fade-in { animation: fade 0.2s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<!-- ============ SIDEBAR ============ -->
+<aside id="sidebar">
+  <div id="side-top">
+    <div class="brand">
+      <div class="brand-mark">TW</div>
+      <div>
+        <div class="brand-name">TLLH-WA</div>
+        <div class="brand-status" id="sys-status">bağlanıyor…</div>
+      </div>
+    </div>
+  </div>
+
+  <button id="cmdk-trigger" onclick="openCmdk()">
+    <span>🔍</span> Ara veya git… <kbd>Ctrl K</kbd>
+  </button>
+
+  <div class="nav-group">
+    <button class="nav-item active" data-tab="messages" onclick="switchTab('messages')">
+      <i class="n-ico">◧</i> Mesajlar <span class="n-key">1</span><span class="n-count" id="n-msg"></span>
+    </button>
+    <button class="nav-item" data-tab="deleted" onclick="switchTab('deleted')">
+      <i class="n-ico">⌫</i> Silinenler <span class="n-key">2</span><span class="n-count" id="n-del"></span>
+    </button>
+    <button class="nav-item" data-tab="viewonce" onclick="switchTab('viewonce')">
+      <i class="n-ico">◉</i> Tek Seferlik <span class="n-key">3</span><span class="n-count" id="n-vo"></span>
+    </button>
+    <button class="nav-item" data-tab="permissions" onclick="switchTab('permissions')">
+      <i class="n-ico">⛨</i> İzinler <span class="n-key">4</span><span class="n-count" id="n-rooms"></span>
+    </button>
+  </div>
+
+  <div id="chat-section">
+    <div class="nav-label">Sohbetler</div>
+    <div id="chat-list"><div class="loading"><div class="loader"></div></div></div>
+  </div>
+</aside>
+
+<!-- ============ MAIN ============ -->
+<main id="main">
+  <div id="topbar">
+    <span class="crumb">TLLH-WA</span>
+    <span class="crumb-sep">/</span>
+    <span class="crumb-current" id="crumb-now">Mesajlar</span>
+    <div id="top-stats">
+      <span><b id="s-msg">—</b> mesaj</span>
+      <span><b id="s-del">—</b> silinen</span>
+      <span><b id="s-vo">—</b> medya</span>
+      <span><b id="s-rooms">—</b> oda</span>
+    </div>
+  </div>
+  <div id="panel">
+    <div class="panel-inner">
+      <div class="empty">
+        <h3>Bir sohbet seç</h3>
+        <p><kbd>Ctrl K</kbd> ile hızlıca ara, <kbd>1</kbd>–<kbd>4</kbd> ile bölüm değiştir.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ COMMAND PALETTE ============ -->
+<div id="cmdk-overlay" onclick="if(event.target===this)closeCmdk()">
+  <div id="cmdk">
+    <input id="cmdk-input" placeholder="Sohbet ara veya bölüme git…" autocomplete="off"
+           oninput="cmdkFilter(this.value)" onkeydown="cmdkKeys(event)" />
+    <div id="cmdk-results"></div>
+    <div id="cmdk-foot">
+      <span><kbd>↑↓</kbd> gezin</span>
+      <span><kbd>↵</kbd> seç</span>
+      <span><kbd>esc</kbd> kapat</span>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* ================= State ================= */
+let allChats   = [];
+let activeChat = null;
+let activeTab  = 'messages';
+
+const TABS = {
+  messages:    { name: 'Mesajlar',     ico: '◧' },
+  deleted:     { name: 'Silinenler',   ico: '⌫' },
+  viewonce:    { name: 'Tek Seferlik', ico: '◉' },
+  permissions: { name: 'İzinler',      ico: '⛨' }
+};
+
+/* ================= Boot ================= */
+async function boot() {
+  await loadStats();
+  await loadChats();
+  setInterval(loadStats, 15000);
+  setInterval(() => { if (activeTab !== 'messages' || activeChat) loadPanel(); }, 10000);
+}
+
+async function apiFetch(url, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+/* ================= Stats ================= */
+async function loadStats() {
+  try {
+    const s = await apiFetch('/api/stats');
+    document.getElementById('s-msg').textContent   = fmt(s.total_messages);
+    document.getElementById('s-del').textContent   = fmt(s.total_deleted);
+    document.getElementById('s-vo').textContent    = fmt(s.total_view_once);
+    document.getElementById('s-rooms').textContent = fmt(s.active_rooms);
+    document.getElementById('n-msg').textContent   = fmt(s.total_messages);
+    document.getElementById('n-del').textContent   = fmt(s.total_deleted);
+    document.getElementById('n-vo').textContent    = fmt(s.total_view_once);
+    document.getElementById('n-rooms').textContent = fmt(s.active_rooms);
+
+    const st = document.getElementById('sys-status');
+    st.textContent = s.global_lock ? 'kilitli' : 'aktif';
+    st.classList.toggle('on', !s.global_lock);
+  } catch (_) {}
+}
+
+/* ================= Sohbetler ================= */
+async function loadChats() {
+  try {
+    allChats = await apiFetch('/api/chats');
+    renderChatList(allChats);
+  } catch (_) {
+    document.getElementById('chat-list').innerHTML =
+      '<div class="empty"><p>Liste yüklenemedi.</p></div>';
+  }
+}
+
+function renderChatList(chats) {
+  const el = document.getElementById('chat-list');
+  if (!chats.length) {
+    el.innerHTML = '<div class="empty" style="padding:30px 0"><p>Sohbet yok.</p></div>';
+    return;
+  }
+  el.innerHTML = chats.map(c => {
+    const active = activeChat && activeChat.jid === c.jid ? 'active' : '';
+    const pp     = c.pp_url ? `<img src="${esc(c.pp_url)}" onerror="this.style.display='none'">` : '';
+    const icon   = c.is_group ? '◫' : '○';
+    const jid    = esc(c.jid);
+    return `
+    <div class="chat-item ${active}" data-jid="${jid}"
+         onclick="selectChat(${JSON.stringify(JSON.stringify(c)).replace(/"/g, '&quot;')})">
+      <div class="c-av">${pp || icon}</div>
+      <div class="c-meta">
+        <div class="c-name">${esc(c.name)}</div>
+        <div class="c-preview">${esc((c.last_msg || '').substring(0, 44)) || '—'}</div>
+      </div>
+      <span class="c-time">${fmtTime(c.last_ts)}</span>
+      <button class="c-hide" title="Gizle" onclick="hideChat(event,'${jid}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function selectChat(jsonStr) {
+  try { activeChat = JSON.parse(jsonStr); } catch (_) { return; }
+  document.querySelectorAll('.chat-item').forEach(el =>
+    el.classList.toggle('active', el.dataset.jid === activeChat.jid));
+  if (activeTab !== 'messages') switchTab('messages');
+  else loadPanel();
+}
+
+async function hideChat(e, jid) {
+  e.stopPropagation();
+  try {
+    await apiFetch('/api/hide_chat', 'POST', { jid });
+    allChats = allChats.filter(c => c.jid !== jid);
+    if (activeChat && activeChat.jid === jid) {
+      activeChat = null;
+      showPanel('<div class="empty"><h3>Sohbet gizlendi</h3></div>');
+    }
+    renderChatList(allChats);
+    toast('Sohbet gizlendi');
+  } catch (_) { toast('İşlem başarısız'); }
+}
+
+/* ================= Sekmeler ================= */
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.nav-item').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === tab));
+  document.getElementById('crumb-now').textContent = TABS[tab].name;
+  loadPanel();
+}
+
+function loadPanel() {
+  if (activeTab === 'deleted')     return loadDeleted();
+  if (activeTab === 'viewonce')    return loadViewOnce();
+  if (activeTab === 'permissions') return loadPermissions();
+  if (activeChat) loadMessages(activeChat);
+  else showPanel('<div class="empty"><h3>Bir sohbet seç</h3><p><kbd>Ctrl K</kbd> ile hızlıca arayabilirsin.</p></div>');
+}
+
+/* ================= Mesajlar ================= */
+async function loadMessages(chat) {
+  showPanel('<div class="loading"><div class="loader"></div></div>');
+  try {
+    const msgs = await apiFetch(`/api/messages/${encodeURIComponent(chat.jid)}?limit=80`);
+    const pp = chat.pp_url ? `<img src="${esc(chat.pp_url)}">` : (chat.is_group ? '◫' : '○');
+
+    let html = `
+      <div class="chat-banner fade-in">
+        <div class="av">${pp}</div>
+        <div>
+          <h1>${esc(chat.name)}</h1>
+          <div class="jid">${esc(chat.jid)}</div>
+        </div>
+      </div>
+      <div id="msg-feed" class="fade-in">`;
+
+    if (!msgs.length) {
+      html += '<div class="empty"><h3>Mesaj yok</h3></div>';
+    } else {
+      let lastSender = null, lastDay = null;
+      html += msgs.map(m => {
+        const isMe = !!m.is_from_me;
+        const name = esc(m.sender_name || m.sender_jid.split('@')[0]);
+        const day  = dayKey(m.timestamp);
+
+        let out = '';
+        if (day !== lastDay) {
+          out += `<div class="day-divider">${day}</div>`;
+          lastDay = day;
+          lastSender = null;
+        }
+
+        const grouped = m.sender_jid === lastSender;
+        lastSender = m.sender_jid;
+
+        const badge = m.msg_type !== 'text'
+          ? `<span class="m-badge">${esc(m.msg_type)}</span>` : '';
+
+        if (grouped) {
+          out += `
+          <div class="msg">
+            <div class="m-time-side">${fmtClock(m.timestamp)}</div>
+            <div class="m-body" style="margin-left:0">
+              <div class="m-text">${badge}${esc(m.content || '')}</div>
+            </div>
+          </div>`;
+        } else {
+          out += `
+          <div class="msg" style="margin-top:10px">
+            <div class="m-av">${isMe ? '◆' : '○'}</div>
+            <div class="m-body">
+              <div class="m-head">
+                <span class="m-name ${isMe ? 'me' : ''}">${isMe ? 'Sen' : name}</span>
+                ${isMe ? '<span class="m-me-tag">BOT</span>' : ''}
+                <span class="m-time">${fmtClock(m.timestamp)}</span>
+              </div>
+              <div class="m-text">${badge}${esc(m.content || '')}</div>
+            </div>
+          </div>`;
+        }
+        return out;
+      }).join('');
+    }
+    html += '</div>';
+    showPanel(html);
+  } catch (_) {
+    showPanel('<div class="empty"><h3>Yüklenemedi</h3></div>');
+  }
+}
+
+/* ================= Silinenler ================= */
+async function loadDeleted() {
+  showPanel('<div class="loading"><div class="loader"></div></div>');
+  try {
+    const rows = await apiFetch('/api/deleted?limit=100');
+    let html = `
+      <div class="page-head fade-in">
+        <h1>Silinenler</h1>
+        <p>${rows.length} kayıt · geri alınan mesajların dökümü</p>
+      </div>`;
+    if (!rows.length) {
+      html += '<div class="empty"><h3>Silinen mesaj yok</h3></div>';
+    } else {
+      html += `<div class="table-wrap fade-in"><table>
+        <thead><tr><th>Silen</th><th>Sohbet</th><th>İçerik</th><th>Tür</th><th>Zaman</th></tr></thead><tbody>`;
+      html += rows.map(r => `
+        <tr>
+          <td class="td-strong">${esc((r.deleted_by_jid || '').split('@')[0])}</td>
+          <td class="td-dim">${esc(r.chat_jid.split('@')[0])}</td>
+          <td style="max-width:340px">${esc(r.content || '—')}</td>
+          <td><span class="m-badge">${esc(r.msg_type || '?')}</span></td>
+          <td class="td-dim">${fmtDatetime(r.deleted_at)}</td>
+        </tr>`).join('');
+      html += '</tbody></table></div>';
+    }
+    showPanel(html);
+  } catch (_) {
+    showPanel('<div class="empty"><h3>Yüklenemedi</h3></div>');
+  }
+}
+
+/* ================= Tek Seferlik ================= */
+async function loadViewOnce() {
+  showPanel('<div class="loading"><div class="loader"></div></div>');
+  try {
+    const rows = await apiFetch('/api/view_once?limit=100');
+    let html = `
+      <div class="page-head fade-in">
+        <h1>Tek Seferlik</h1>
+        <p>${rows.length} kayıt · yakalanan view-once medyalar</p>
+      </div>`;
+    if (!rows.length) {
+      html += '<div class="empty"><h3>Kayıt yok</h3></div>';
+    } else {
+      html += `<div class="table-wrap fade-in"><table>
+        <thead><tr><th style="width:64px">Önizleme</th><th>Gönderen</th><th>Sohbet</th><th>Tür</th><th>Boyut</th><th>Zaman</th></tr></thead><tbody>`;
+      html += rows.map(r => {
+        const isImg = r.media_type === 'image';
+        const thumb = isImg
+          ? `<img class="vo-thumb" src="/static/vo_thumb?path=${encodeURIComponent(r.file_path)}" onerror="this.outerHTML='—'" />`
+          : `<span class="td-dim">video</span>`;
+        const size = r.file_size ? `${(r.file_size / 1024).toFixed(1)} KB` : '—';
+        return `
+        <tr>
+          <td>${thumb}</td>
+          <td class="td-strong">${esc(r.sender_name || r.sender_jid.split('@')[0])}</td>
+          <td class="td-dim">${esc(r.chat_jid.split('@')[0])}</td>
+          <td><span class="m-badge">${esc(r.media_type)}</span></td>
+          <td class="td-dim">${size}</td>
+          <td class="td-dim">${fmtDatetime(r.timestamp)}</td>
+        </tr>`;
+      }).join('');
+      html += '</tbody></table></div>';
+    }
+    showPanel(html);
+  } catch (_) {
+    showPanel('<div class="empty"><h3>Yüklenemedi</h3></div>');
+  }
+}
+
+/* ================= İzinler ================= */
+async function loadPermissions() {
+  showPanel('<div class="loading"><div class="loader"></div></div>');
+  try {
+    const rows = await apiFetch('/api/permissions');
+    let html = `
+      <div class="page-head fade-in">
+        <h1>İzinler</h1>
+        <p>${rows.length} oda · çalışma kuralları</p>
+      </div>`;
+    if (!rows.length) {
+      html += '<div class="empty"><h3>İzinli oda yok</h3><p>Bir odada <kbd>.start</kbd> komutu ile başlat.</p></div>';
+    } else {
+      html += `<div class="table-wrap fade-in"><table>
+        <thead><tr><th>Ad</th><th>JID</th><th>Durum</th><th>Eklenme</th><th>Durdurulma</th></tr></thead><tbody>`;
+      html += rows.map(r => `
+        <tr>
+          <td class="td-strong">${esc(r.chat_name || '—')}</td>
+          <td class="td-dim">${esc(r.chat_jid)}</td>
+          <td><span class="status-dot ${r.is_active ? 'on' : 'off'}">${r.is_active ? 'Aktif' : 'Durduruldu'}</span></td>
+          <td class="td-dim">${fmtDatetime(r.added_at)}</td>
+          <td class="td-dim">${r.stopped_at ? fmtDatetime(r.stopped_at) : '—'}</td>
+        </tr>`).join('');
+      html += '</tbody></table></div>';
+    }
+    showPanel(html);
+  } catch (_) {
+    showPanel('<div class="empty"><h3>Yüklenemedi</h3></div>');
+  }
+}
+
+/* ================= COMMAND PALETTE ================= */
+let ckIndex = 0;
+let ckItems = [];
+
+function openCmdk() {
+  document.getElementById('cmdk-overlay').classList.add('open');
+  const inp = document.getElementById('cmdk-input');
+  inp.value = '';
+  cmdkFilter('');
+  setTimeout(() => inp.focus(), 10);
+}
+function closeCmdk() {
+  document.getElementById('cmdk-overlay').classList.remove('open');
+}
+
+function cmdkFilter(q) {
+  const lq = q.toLowerCase().trim();
+  ckItems = [];
+
+  // Bölümler
+  const tabs = Object.entries(TABS)
+    .filter(([k, v]) => !lq || v.name.toLowerCase().includes(lq))
+    .map(([k, v]) => ({ type: 'tab', key: k, label: v.name, ico: v.ico }));
+
+  // Sohbetler
+  const chats = allChats
+    .filter(c => !lq || c.name.toLowerCase().includes(lq) || c.jid.toLowerCase().includes(lq))
+    .slice(0, 8)
+    .map(c => ({ type: 'chat', chat: c, label: c.name, ico: c.is_group ? '◫' : '○' }));
+
+  ckItems = [...tabs, ...chats];
+  ckIndex = 0;
+  renderCmdk(lq, tabs.length);
+}
+
+function renderCmdk(q, tabCount) {
+  const el = document.getElementById('cmdk-results');
+  if (!ckItems.length) {
+    el.innerHTML = '<div class="ck-empty">Sonuç yok</div>';
+    return;
+  }
+  let html = '';
+  ckItems.forEach((it, i) => {
+    if (i === 0 && tabCount > 0) html += '<div class="ck-label">Git</div>';
+    if (i === tabCount && ckItems.length > tabCount) html += '<div class="ck-label">Sohbetler</div>';
+    html += `
+      <div class="ck-item ${i === ckIndex ? 'selected' : ''}" data-i="${i}"
+           onclick="ckSelect(${i})" onmousemove="ckHover(${i})">
+        <i class="ck-ico">${it.ico}</i>
+        <span>${esc(it.label)}</span>
+        <span class="ck-hint">${it.type === 'tab' ? 'bölüm' : 'sohbet'}</span>
+      </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function ckHover(i) {
+  if (ckIndex === i) return;
+  ckIndex = i;
+  document.querySelectorAll('.ck-item').forEach(el =>
+    el.classList.toggle('selected', +el.dataset.i === i));
+}
+
+function ckSelect(i) {
+  const it = ckItems[i];
+  if (!it) return;
+  closeCmdk();
+  if (it.type === 'tab') switchTab(it.key);
+  else selectChat(JSON.stringify(it.chat));
+}
+
+function cmdkKeys(e) {
+  if (e.key === 'ArrowDown') { e.preventDefault(); ckIndex = Math.min(ckIndex + 1, ckItems.length - 1); refreshCkSel(); }
+  if (e.key === 'ArrowUp')   { e.preventDefault(); ckIndex = Math.max(ckIndex - 1, 0); refreshCkSel(); }
+  if (e.key === 'Enter')     { e.preventDefault(); ckSelect(ckIndex); }
+  if (e.key === 'Escape')    { closeCmdk(); }
+}
+function refreshCkSel() {
+  document.querySelectorAll('.ck-item').forEach(el =>
+    el.classList.toggle('selected', +el.dataset.i === ckIndex));
+  const sel = document.querySelector('.ck-item.selected');
+  if (sel) sel.scrollIntoView({ block: 'nearest' });
+}
+
+/* Global kısayollar */
+document.addEventListener('keydown', e => {
+  const inInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    openCmdk();
+    return;
+  }
+  if (e.key === 'Escape') closeCmdk();
+
+  if (!inInput && !e.ctrlKey && !e.metaKey) {
+    if (e.key === '1') switchTab('messages');
+    if (e.key === '2') switchTab('deleted');
+    if (e.key === '3') switchTab('viewonce');
+    if (e.key === '4') switchTab('permissions');
+  }
+});
+
+/* ================= Yardımcılar ================= */
+function showPanel(html) {
+  document.getElementById('panel').innerHTML = `<div class="panel-inner">${html}</div>`;
+}
+function esc(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmt(n) {
+  if (n == null || n === '') return '';
+  return Number(n).toLocaleString('tr-TR');
+}
+function fmtTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts * 1000), now = new Date();
+  if (d.toDateString() === now.toDateString())
+    return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' });
+}
+function fmtClock(ts) {
+  if (!ts) return '';
+  return new Date(ts * 1000).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+}
+function fmtDatetime(ts) {
+  if (!ts) return '—';
+  return new Date(ts * 1000).toLocaleString('tr-TR', {
+    day: '2-digit', month: '2-digit', year: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+function dayKey(ts) {
+  const d = new Date(ts * 1000), now = new Date();
+  if (d.toDateString() === now.toDateString()) return 'Bugün';
+  const yest = new Date(now); yest.setDate(now.getDate() - 1);
+  if (d.toDateString() === yest.toDateString()) return 'Dün';
+  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+}
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+boot();
+</script>
+</body>
+</html>
